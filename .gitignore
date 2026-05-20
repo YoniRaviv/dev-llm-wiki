@@ -1,0 +1,19 @@
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Obsidian local state — keep settings out, but feel free to commit shared plugins/themes
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json.backup-*
+
+# Claude Code local overrides
+.claude/settings.local.json
+
+# Script-generated logs
+.scripts/*.log
