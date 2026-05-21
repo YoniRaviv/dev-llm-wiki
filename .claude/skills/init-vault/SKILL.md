@@ -45,7 +45,7 @@ One `AskUserQuestion` call with these four questions:
 
 1. **Your name** — `header: "Name"`. Provide two plausible label options plus the implicit Other for free text. Used in the eventual commit message.
 2. **Your role** — `header: "Role"`. Options: frontend, backend, full-stack, ML/data, founder or solo builder.
-3. **Primary stack** — `header: "Stack"`. Options: TypeScript-React, Python-ML, Go, Rust, Ruby-Rails, Java-Kotlin. Other for anything else.
+3. **Stack(s) you work in** — `header: "Stack"`, **`multiSelect: true`**. Options: TypeScript-React, Python-ML, Go, Rust, Ruby-Rails, Java-Kotlin. Other for anything else. Most devs work across multiple stacks — encourage picking all that apply, single selection also fine.
 4. **What kind of projects** — `header: "Projects"`. Options: SaaS products, libraries/tools, internal/business apps, research/POCs, mixed.
 
 Store the answers locally — you'll use them in Step 6 (topic seeding) and Step 7 (CLAUDE.md tweaks).
@@ -139,12 +139,12 @@ If daily_ingest = no:
 
 ### Step 6 — Seed topics
 
-Read `references/topic-seeds.md`. Based on the user's stack and project-kind from Step 2, compose a starter list:
+Read `references/topic-seeds.md`. Based on the user's **stacks** (array) and project-kind from Step 2, compose a starter list:
 
-- 5-7 topics from their **stack** bucket
+- 3-5 topics from each selected stack bucket, deduplicated across stacks
 - 3-5 topics from their **project-kind** bucket
 - 3-5 from the **cross-cutting** bucket (always relevant)
-- Cap at 20 total. Trim if needed.
+- Cap at 20 total. If trimming is needed, prioritize topics that appear across multiple selected stacks, then stack-agnostic ones.
 
 Show the proposed list as a clean markdown block. Ask: "Approve, edit, or skip?" via `AskUserQuestion` (Other for edits).
 
@@ -172,7 +172,7 @@ Write `.vault-meta.json` at the repo root:
   "skill_version": "1.0",
   "owner": "<name>",
   "role": "<role>",
-  "stack_primary": "<stack>",
+  "stacks": ["<stack>", "..."],
   "project_kinds": "<kind>",
   "date_format": "DD-MM-YYYY | MM-DD-YYYY | YYYY-MM-DD",
   "folders": {

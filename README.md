@@ -162,39 +162,72 @@ Claude and Obsidian work together natively — both read and write the same plai
 
 ## Getting started
 
-### Option 1 — Clone as-is (fastest)
+End-to-end walkthrough from zero to first ingest. Takes about 10 minutes.
+
+### 1. Clone the repo
 
 ```sh
 git clone https://github.com/YoniRaviv/dev-llm-wiki.git my-wiki
 cd my-wiki
+```
+
+### 2. Open the folder as a vault in Obsidian
+
+1. Launch Obsidian
+2. Click **"Open folder as vault"** on the welcome screen (or **File → Open vault → Open folder as vault**)
+3. Select the `my-wiki` directory you just cloned
+4. Trust the vault when prompted
+
+You'll see `wiki/` (the curated knowledge — what you read), `raw/` (the sources — what you drop in), and the support files. **The wiki/ folder is where you spend most of your time** — Obsidian's graph view and backlinks make the cross-links navigable.
+
+### 3. Open the same folder in Claude Code
+
+From inside the `my-wiki` directory:
+
+```sh
 claude
 ```
 
-The wiki is empty and ready. Drop your first source into `raw/articles/` and ask Claude to `ingest <path>`.
+Claude Code auto-loads `CLAUDE.md` and the project-scoped skills under `.claude/skills/`. You should see the available skills listed when the session starts.
 
-### Option 2 — Personalize first
+### 4. Personalize the vault
 
-After cloning, ask Claude:
+In the Claude session, say:
 
-> "Set up this wiki for me."
+> **"Set up this wiki for me."**
 
-This invokes the `init-vault` skill — walks through personalization (date format, folder picks, topic seed) and writes `.vault-meta.json`.
+This triggers the **`init-vault`** skill — walks you through ~10 questions (name, role, stack(s), date format, folder customization, journal opt-in, starter topics) and applies all the cascading edits across `CLAUDE.md`, `README.md`, templates, and scripts. End result: a vault that matches how you actually work. Writes `.vault-meta.json` so this only runs once.
 
-### Option 3 — Install global skills
-
-The repo ships with skills designed to be available **everywhere**, not just inside the wiki directory. Run once after cloning:
+### 5. Install global skills
 
 ```sh
 .scripts/install-global-skills.sh
 ```
 
-This copies skills from `global-skills/` to `~/.claude/skills/` and bakes in your vault's absolute path. After that, from **any project codebase** you can say:
+Copies skills from `global-skills/` to `~/.claude/skills/` with your vault path baked in. After this, from **any project codebase** you can say "send to wiki" / "save to vault" and Claude will write the content to the right lifecycle slot in this vault without switching directories.
 
-> "Send this feature plan to the wiki" / "save to vault" / "add to my wiki"
+Re-run any time to update the installed skills.
 
-…and Claude will write the content to the right lifecycle slot in `raw/projects/<slug>/` without you switching directories.
+### 6. Try your first ingest
 
-Re-run any time to update the installed skills to the latest version from the repo.
+Drop a test source into `raw/articles/`. For example, save any article as markdown:
+
+```sh
+echo "# Test article\n\nA short note about something interesting." > raw/articles/test.md
+```
+
+Back in Claude, say:
+
+> **"ingest raw/articles/test.md"**
+
+Claude reads the source, asks you what to emphasize, then creates:
+- A summary page at `wiki/sources/DD-MM-YYYY-test.md`
+- Updates to `wiki/index.md` and `wiki/log.md`
+- New or updated pages anywhere in `wiki/` the source is relevant to
+
+Verify in Obsidian: open `wiki/sources/` — you should see the new file with citations linking back to other pages.
+
+You're set up. From here, [start a real project](#starting-a-new-project--the-crafted-walkthrough) or just keep dropping sources into `raw/` and asking Claude to ingest them.
 
 ## Setting up daily journal ingest (optional)
 
