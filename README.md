@@ -1,5 +1,7 @@
 # claude-dev-wiki
 
+> **Seed idea:** [Andrej Karpathy's "vibe-coding" gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — the original prompt for keeping an LLM-maintained wiki alongside your code.
+
 A personal dev knowledge base for builders, maintained by an LLM (Claude Code, Cursor, etc.) and read by you. You drop sources into `raw/`, the LLM distills them into `wiki/`, and over time the wiki becomes a queryable second brain that informs every future task.
 
 The contract for how the LLM operates lives in [`CLAUDE.md`](./CLAUDE.md) — loaded automatically on every Claude Code session opened in this directory.
@@ -20,34 +22,36 @@ Every project moves through seven phases from spark to ship. Some happen in this
 ```mermaid
 flowchart LR
     subgraph VAULT1["📔 VAULT — Plan it"]
-        C["💡 Conceive<br/><sub>00-idea.md</sub>"]
-        R["🔍 Research<br/><sub>01-research.md</sub>"]
-        A["📋 Architect<br/><sub>02-prd.md</sub>"]
+        direction LR
+        C["💡 Conceive"]
+        R["🔍 Research"]
+        A["📋 Architect"]
     end
 
     subgraph PROJ["💻 PROJECT REPO — Do it"]
-        F["🗺️ Frame<br/><sub>feature plans</sub>"]
-        T["🔨 Try<br/><sub>build the thing</sub>"]
-        E["✅ Evaluate<br/><sub>test the thing</sub>"]
+        direction LR
+        F["🗺️ Frame"]
+        T["🔨 Try"]
+        E["✅ Evaluate"]
     end
 
     subgraph VAULT2["📔 VAULT — Record it"]
-        D["🚀 Deliver<br/><sub>wiki/projects/&lt;slug&gt;/features/</sub>"]
+        D["🚀 Deliver"]
     end
 
     C --> R --> A --> F --> T --> E --> D
 
-    F -. saves feature plans to .-> VAULT1
-    T -. tracked by claude-history-ingest .-> VAULT2
-    E -. tracked by claude-history-ingest .-> VAULT2
+    F -.->|saves feature plans| VAULT1
+    T -.->|claude-history-ingest| VAULT2
+    E -.->|claude-history-ingest| VAULT2
 
-    style C fill:#dbeafe
-    style R fill:#dbeafe
-    style A fill:#dbeafe
-    style F fill:#fef3c7
-    style T fill:#fef3c7
-    style E fill:#fef3c7
-    style D fill:#d1fae5
+    style C fill:#dbeafe,stroke:#93c5fd
+    style R fill:#dbeafe,stroke:#93c5fd
+    style A fill:#dbeafe,stroke:#93c5fd
+    style F fill:#fef3c7,stroke:#fcd34d
+    style T fill:#fef3c7,stroke:#fcd34d
+    style E fill:#fef3c7,stroke:#fcd34d
+    style D fill:#d1fae5,stroke:#6ee7b7
 ```
 
 ### Phase mapping
@@ -101,10 +105,22 @@ Install superpowers and Matt Pocock's skills via the standard Claude Code plugin
 │   ├── repos/           ← GitHub repo notes
 │   ├── ideas/           ← raw idea dumps
 │   └── projects/        ← project lifecycle docs (one folder per project)
-│       └── _template/   ← skeleton copied by .scripts/new-project.sh
+│       ├── _template/   ← skeleton copied by .scripts/new-project.sh
+│       └── <slug>/
+│           ├── STATUS.md          ← quick-glance status; updated frequently
+│           ├── 00-idea.md         ← Conceive: initial spark
+│           ├── 01-research.md     ← Research: landscape + verdict
+│           ├── 02-prd.md          ← Architect: what + why
+│           ├── 03-plan.md         ← Frame: high-level how
+│           ├── kanban.md          ← task board
+│           ├── features/          ← one .md per feature
+│           ├── roadmaps/          ← versioned roadmaps (v1.md, v2.md, …)
+│           ├── notes/             ← dated meeting/ad-hoc notes
+│           └── archive/           ← superseded docs worth keeping
 ├── .scripts/            ← automation: new-project.sh, list-claude-history.py, etc.
 ├── .claude/skills/      ← 10 project-scoped skills the LLM can invoke
-└── .manifest.json       ← ingest ledger (sources processed, hashes, timestamps)
+├── .manifest.json       ← ingest ledger (sources processed, hashes, timestamps)
+└── .vault-meta.json     ← personalization config written by init-vault (one-time)
 ```
 
 ## Skills — when to use each
@@ -155,6 +171,36 @@ After cloning, ask Claude:
 > "Set up this wiki for me."
 
 This invokes the `init-vault` skill — walks through personalization (date format, folder picks, topic seed) and writes `.vault-meta.json`.
+
+## Setting up daily journal ingest (optional)
+
+`daily-ingest.sh` is a scheduled script that automatically creates yesterday's journal page and populates it with a summary of your Claude Code sessions. Without it, you run `claude-history-ingest` manually whenever you want a sync.
+
+The script ships as a **stub** — you need to implement steps 2–4 (reading `.jsonl` files, summarizing, writing back to the journal). The comments inside explain the approach. Once implemented:
+
+**macOS — one command:**
+
+```sh
+.scripts/install-launchd.sh
+```
+
+Installs a launchd plist that runs `daily-ingest.sh` at 9:30am every day. Logs go to `.scripts/daily-ingest.log`.
+
+To uninstall:
+```sh
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.user.dev-wiki.daily-ingest.plist && \
+  rm ~/Library/LaunchAgents/com.user.dev-wiki.daily-ingest.plist
+```
+
+**Linux — add a crontab entry:**
+
+```sh
+crontab -e
+# add:
+30 9 * * * /absolute/path/to/.scripts/daily-ingest.sh >> /absolute/path/to/.scripts/daily-ingest.log 2>&1
+```
+
+If you don't want to implement the script, the `claude-history-ingest` skill does the same thing interactively — ask Claude "ingest my Claude history" any time.
 
 ## Starting a new project — the CRAFTED walkthrough
 
