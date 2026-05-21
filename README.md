@@ -101,6 +101,8 @@ Install superpowers and Matt Pocock's skills via the standard Claude Code plugin
 │           ├── roadmaps/          ← versioned roadmaps (v1.md, v2.md, …)
 │           ├── notes/             ← dated meeting/ad-hoc notes
 │           └── archive/           ← superseded docs worth keeping
+├── global-skills/       ← skills to install globally (~/.claude/skills/) via install-global-skills.sh
+│   └── send-to-wiki/    ← send feature plans & notes to the vault from any codebase
 ├── .scripts/            ← automation: new-project.sh, list-claude-history.py, etc.
 ├── .claude/skills/      ← 10 project-scoped skills the LLM can invoke
 ├── .manifest.json       ← ingest ledger (sources processed, hashes, timestamps)
@@ -136,6 +138,28 @@ The vault ships with 10 skills under `.claude/skills/`. Claude Code auto-discove
 | [`wiki-lint`](.claude/skills/wiki-lint/) | "lint the wiki", "audit", "what needs fixing" | 12-check health audit: orphans, broken links, missing frontmatter, stale projects, topic vocabulary issues, date format consistency, journal filename pattern. |
 | [`cross-linker`](.claude/skills/cross-linker/) | "link my pages", "cross-reference", "find missing links" | Write-heavy companion to `wiki-lint` — actually inserts the missing `[[wikilinks]]`. Pair with lint: lint finds the problems, cross-linker fixes them. |
 
+## Prerequisites
+
+### Required
+
+| Tool | Why | Install |
+|---|---|---|
+| **[Claude Code](https://claude.ai/code)** | Runs all skills and wiki operations — the LLM that writes and queries the wiki | [claude.ai/code](https://claude.ai/code) |
+| **[Obsidian](https://obsidian.md)** | The wiki UI — view, edit, navigate, and connect the markdown files. Graph view, backlinks, tag browser, and Dataview are how the wiki actually becomes browsable. | [obsidian.md](https://obsidian.md) → open the cloned repo root as a vault |
+| **[Git](https://git-scm.com)** | Clone the repo, version-control your wiki | [git-scm.com](https://git-scm.com) |
+| **bash / zsh** | Run `.scripts/` automation | Built into macOS and Linux. Windows: use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). |
+
+Claude and Obsidian work together natively — both read and write the same plain markdown files. No API or special integration is needed.
+
+### Optional
+
+| Tool | Why | Install |
+|---|---|---|
+| **[Obsidian Web Clipper](https://obsidian.md/clipper)** | Browser extension that clips articles, tweets, and pages straight into `raw/articles/` (or `raw/tweets/`). Feeds the wiki without manual copy-paste. | [obsidian.md/clipper](https://obsidian.md/clipper) — Chrome, Firefox, Safari, Edge, Arc |
+| **[Claude Code `obsidian` plugin](https://docs.claude.com/en/docs/claude-code/plugins)** + **[Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)** | Only needed if you want the `obsidian:obsidian-cli` skill — triggers Obsidian commands, runs JavaScript in the vault, reloads plugins. Wiki operations don't need this. | Install Local REST API in Obsidian (Community plugins → "Local REST API"), then install the obsidian plugin from the Claude Code marketplace |
+| **[`superpowers` plugin](https://github.com/obra/superpowers)** | Provides `brainstorming`, `writing-plans`, and other planning skills referenced in the Frame phase. | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| **[Matt Pocock's skills](https://github.com/mattpocock/skills)** | Provides `to-prd` and `grill-me` for the Architect phase. | [github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+
 ## Getting started
 
 ### Option 1 — Clone as-is (fastest)
@@ -155,6 +179,22 @@ After cloning, ask Claude:
 > "Set up this wiki for me."
 
 This invokes the `init-vault` skill — walks through personalization (date format, folder picks, topic seed) and writes `.vault-meta.json`.
+
+### Option 3 — Install global skills
+
+The repo ships with skills designed to be available **everywhere**, not just inside the wiki directory. Run once after cloning:
+
+```sh
+.scripts/install-global-skills.sh
+```
+
+This copies skills from `global-skills/` to `~/.claude/skills/` and bakes in your vault's absolute path. After that, from **any project codebase** you can say:
+
+> "Send this feature plan to the wiki" / "save to vault" / "add to my wiki"
+
+…and Claude will write the content to the right lifecycle slot in `raw/projects/<slug>/` without you switching directories.
+
+Re-run any time to update the installed skills to the latest version from the repo.
 
 ## Setting up daily journal ingest (optional)
 
