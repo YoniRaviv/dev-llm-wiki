@@ -21,38 +21,22 @@ Every project moves through seven phases from spark to ship. Some happen in this
 
 ```mermaid
 flowchart LR
-    subgraph VAULT1["📔 VAULT — Plan it"]
-        direction LR
-        C["💡 Conceive"]
-        R["🔍 Research"]
-        A["📋 Architect"]
-    end
-
-    subgraph PROJ["💻 PROJECT REPO — Do it"]
-        direction LR
-        F["🗺️ Frame"]
-        T["🔨 Try"]
-        E["✅ Evaluate"]
-    end
-
-    subgraph VAULT2["📔 VAULT — Record it"]
-        D["🚀 Deliver"]
-    end
+    C["💡 Conceive"]:::vault
+    R["🔍 Research"]:::vault
+    A["📋 Architect"]:::vault
+    F["🗺️ Frame"]:::repo
+    T["🔨 Try"]:::repo
+    E["✅ Evaluate"]:::repo
+    D["🚀 Deliver"]:::done
 
     C --> R --> A --> F --> T --> E --> D
 
-    F -.->|saves feature plans| VAULT1
-    T -.->|claude-history-ingest| VAULT2
-    E -.->|claude-history-ingest| VAULT2
-
-    style C fill:#dbeafe,stroke:#93c5fd
-    style R fill:#dbeafe,stroke:#93c5fd
-    style A fill:#dbeafe,stroke:#93c5fd
-    style F fill:#fef3c7,stroke:#fcd34d
-    style T fill:#fef3c7,stroke:#fcd34d
-    style E fill:#fef3c7,stroke:#fcd34d
-    style D fill:#d1fae5,stroke:#6ee7b7
+    classDef vault fill:#dbeafe,stroke:#93c5fd,color:#1e3a8a
+    classDef repo  fill:#fef3c7,stroke:#fcd34d,color:#78350f
+    classDef done  fill:#d1fae5,stroke:#6ee7b7,color:#064e3b
 ```
+
+> 🔵 **Blue** = Vault (plan it) · 🟡 **Yellow** = Project repo (do it) · 🟢 **Green** = Vault (record it)
 
 ### Phase mapping
 
@@ -157,7 +141,7 @@ The vault ships with 10 skills under `.claude/skills/`. Claude Code auto-discove
 ### Option 1 — Clone as-is (fastest)
 
 ```sh
-git clone <this-repo> my-wiki
+git clone https://github.com/YoniRaviv/dev-llm-wiki.git my-wiki
 cd my-wiki
 claude
 ```
