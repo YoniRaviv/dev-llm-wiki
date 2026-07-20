@@ -17,6 +17,8 @@ The flow is one-way: stuff comes in through `raw/`, gets distilled into `wiki/`,
 
 ## The workflow — CRAFTED
 
+Go deeper: https://yonathan-raviv.dev/thoughts/how-i-work-with-claude/
+
 Every project moves through seven phases from spark to ship. Some happen in this vault (planning + records), others happen in your actual code repo (the work). The vault stores the **plan** and the **distilled result**; the project repo is where the code lives.
 
 ```mermaid
