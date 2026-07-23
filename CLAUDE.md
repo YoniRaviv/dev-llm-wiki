@@ -22,6 +22,7 @@ wiki/
 ├── index.md       — content catalog (READ THIS FIRST on every operation)
 ├── topics.md      — controlled vocabulary for the `topics:` frontmatter field
 ├── hot.md         — short-lived cache of active threads, recent activity, open loops
+├── today.md       — daily "where I left off" surface, machine-written by the standup skill (never hand-edit)
 └── log.md         — append-only event log
 
 raw/
@@ -29,6 +30,7 @@ raw/
 ├── tweets/        — clipped tweets and threads
 ├── repos/         — clipped GitHub repos
 ├── ideas/         — raw idea dumps and rough notes
+├── meetings/      — one note per meeting (prep + live notes + summary), written by the meeting-prep skill
 └── projects/      — one folder per project, all kebab-case slugs matching the wiki slug
     ├── _template/      — copy-paste skeleton; scaffold new projects with .scripts/new-project.sh
     └── <project-slug>/
@@ -45,8 +47,15 @@ raw/
 
 .manifest.json     — ingest tracking ledger; records every source file ingested with hash, timestamp, and pages affected
 .scripts/          — automation scripts; new-project.sh scaffolds a new raw/projects/<slug>/ from _template
-.claude/skills/    — project-scoped skills the LLM may invoke
+.claude/skills/    — project-scoped skills bundled with this vault (auto-discovered when Claude runs here)
+global-skills/     — skills installed globally via .scripts/install-global-skills.sh (e.g. send-to-wiki)
 ```
+
+Some workflows live in the [`YoniRaviv/claude-skills`](https://github.com/YoniRaviv/claude-skills)
+marketplace rather than being bundled here — notably `idea-deep-research` (Research phase),
+`claude-history-ingest` (progress tracking), `standup` (writes `wiki/today.md`), and `meeting-prep`
+(writes `raw/meetings/`). Install them with `/plugin marketplace add YoniRaviv/claude-skills`. See
+the README's "Skills" section for the full split of bundled vs. marketplace skills.
 
 ### Working with raw/projects/
 

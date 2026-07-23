@@ -45,10 +45,10 @@ flowchart LR
 | | Phase | Where | Artifact | What helps |
 |---|---|---|---|---|
 | **C** | **Conceive** | Vault | `raw/projects/<slug>/00-idea.md` | Manual capture — `.scripts/new-project.sh <slug>` scaffolds the folder. |
-| **R** | **Research** | Vault | `raw/projects/<slug>/01-research.md` | [`wiki-research`](.claude/skills/wiki-research/) — multi-round web search, landscape + honest verdict. |
+| **R** | **Research** | Vault | `wiki/ideas/<slug>.md` (or `raw/projects/<slug>/01-research.md`) | [`idea-deep-research`](https://github.com/YoniRaviv/claude-skills) *(marketplace)* — multi-round web search, landscape + honest verdict. |
 | **A** | **Architect** | Vault | `raw/projects/<slug>/02-prd.md` | Manual — what + why. The [`to-prd`](https://github.com/mattpocock/skills) skill from [Matt Pocock's skills](https://github.com/mattpocock/skills) can draft a PRD from your current conversation context. Stress-test it with [`grill-me`](https://github.com/mattpocock/skills) before committing. |
 | **F** | **Frame** | **Project repo** | `raw/projects/<slug>/features/*.md` (saved back to vault) + `03-plan.md` for the high-level | **Claude Code Plan Mode** (built-in, Shift+Tab) and **[`brainstorming`](https://github.com/obra/superpowers)** + **[`writing-plans`](https://github.com/obra/superpowers)** from the [superpowers](https://github.com/obra/superpowers) plugin. Stress-test the resulting plan with **[`grill-me`](https://github.com/mattpocock/skills)** from [Matt Pocock's skills](https://github.com/mattpocock/skills). Detailed feature/section plans get written in the project repo; the resulting feature files are saved into the vault so other skills (`wiki-promote-feature`, `claude-history-ingest`) can find them. |
-| **T** | **Try** | **Project repo** | code, commits, PRs | [`claude-history-ingest`](.claude/skills/claude-history-ingest/) passively tracks what you worked on, advances feature statuses, flags blockers. |
+| **T** | **Try** | **Project repo** | code, commits, PRs | [`claude-history-ingest`](https://github.com/YoniRaviv/claude-skills) *(marketplace)* passively tracks what you worked on, advances feature statuses, flags blockers. |
 | **E** | **Evaluate** | **Project repo** | tests, debugging notes | Same — captured via the same Claude Code sessions. |
 | **D** | **Deliver** | Vault | `wiki/projects/<slug>/features/<name>.md` + auto-created decision pages | [`wiki-promote-feature`](.claude/skills/wiki-promote-feature/) — lifts the working feature doc into the schema-compliant wiki page. |
 
@@ -56,17 +56,28 @@ The key split: **detailed work (Frame, Try, Evaluate) happens in your actual cod
 
 After Deliver, the wiki becomes the lasting reference — citation-backed knowledge that future projects can consult via [`wiki-query`](.claude/skills/wiki-query/).
 
+**Cross-cutting (any phase):** [`standup`](https://github.com/YoniRaviv/claude-skills) *(marketplace)* reassembles where you left off across every project into `wiki/today.md` each morning; [`meeting-prep`](https://github.com/YoniRaviv/claude-skills) *(marketplace)* carries a meeting through prep → live notes → summary as a single note in `raw/meetings/`. Both are day-to-day surfaces that sit alongside the CRAFTED pipeline rather than inside one phase.
+
 ## Companion tools (outside the template)
 
-The vault ships with 10 skills (listed below). But the Frame phase is best done with external tools that aren't shipped here:
+The vault bundles **8 project-scoped skills** (listed below) plus a handful of **marketplace skills** it references. The Frame phase and general planning are best done with external tools that aren't bundled here — the easiest way to get all of them, and the marketplace-referenced skills above, is my one-stop skills repo: **[`YoniRaviv/claude-skills`](https://github.com/YoniRaviv/claude-skills)**.
+
+```sh
+# In any Claude Code session:
+/plugin marketplace add YoniRaviv/claude-skills
+/plugin install yoni-skills@yoni-marketplace     # my own skills (idea-deep-research, claude-history-ingest, …)
+/plugin install superpowers@yoni-marketplace     # brainstorming, writing-plans, TDD, systematic-debugging
+/plugin install ui-ux-pro-max@yoni-marketplace   # UI/UX design intelligence
+```
+
+The planning-side tools this vault leans on:
 
 - **[Claude Code Plan Mode](https://docs.claude.com/en/docs/claude-code/overview)** — built into Claude Code. Press **Shift+Tab** in a session to switch into plan mode; Claude proposes a step-by-step plan you approve before any code is written. Best for "I know roughly what to do, let me lock in the steps before I touch files."
-- **[`brainstorming`](https://github.com/obra/superpowers/tree/main/skills/brainstorming)** *(superpowers plugin)* — explores requirements and design before implementation. Use when the shape of the solution isn't clear yet.
-- **[`writing-plans`](https://github.com/obra/superpowers/tree/main/skills/writing-plans)** *(superpowers plugin)* — turns a spec into a multi-step implementation plan. Use after brainstorming when you have requirements but no concrete plan.
-- **[`to-prd`](https://github.com/mattpocock/skills)** *(from [Matt Pocock's skills](https://github.com/mattpocock/skills))* — turns the current conversation context into a PRD draft. Best in the **Architect** phase when you've been thinking out loud and want a structured PRD without writing it from scratch.
-- **[`grill-me`](https://github.com/mattpocock/skills)** *(from [Matt Pocock's skills](https://github.com/mattpocock/skills))* — interviews you relentlessly about a plan or design until every branch of the decision tree is resolved. Useful in the **Architect** and **Frame** phases for stress-testing a PRD or feature plan before you commit.
+- **[`brainstorming`](https://github.com/obra/superpowers/tree/main/skills/brainstorming)** *(superpowers)* — explores requirements and design before implementation. Use when the shape of the solution isn't clear yet.
+- **[`writing-plans`](https://github.com/obra/superpowers/tree/main/skills/writing-plans)** *(superpowers)* — turns a spec into a multi-step implementation plan. Use after brainstorming when you have requirements but no concrete plan.
+- **[`to-spec`](https://github.com/mattpocock/skills)** / **[`grill-me`](https://github.com/mattpocock/skills)** *(Matt Pocock, install via `npx skills add` — see the [marketplace README](https://github.com/YoniRaviv/claude-skills) section 3)* — draft a spec/PRD from a conversation, then get grilled on it until every branch is resolved. Useful in the **Architect** and **Frame** phases.
 
-Install superpowers and Matt Pocock's skills via the standard Claude Code plugin marketplace or directly from their GitHub repos. None of these are required to use this vault — they're the planning-side tools that pair naturally with the vault's record-side skills.
+None of these are required to use this vault — they're the planning-side tools that pair naturally with the vault's record-side skills.
 
 ## What's in here
 
@@ -77,6 +88,7 @@ Install superpowers and Matt Pocock's skills via the standard Claude Code plugin
 │   ├── index.md         ← content catalog — LLM reads this first on every op
 │   ├── topics.md        ← controlled vocabulary for topic frontmatter
 │   ├── hot.md           ← short-lived "what's live right now" cache
+│   ├── today.md         ← daily "where I left off" surface (machine-written by the standup skill)
 │   ├── log.md           ← append-only event log
 │   ├── templates/       ← one template per entity type
 │   ├── projects/        ← project pages + per-project features/ and decisions/
@@ -90,6 +102,7 @@ Install superpowers and Matt Pocock's skills via the standard Claude Code plugin
 │   ├── tweets/          ← tweets & threads
 │   ├── repos/           ← GitHub repo notes
 │   ├── ideas/           ← raw idea dumps
+│   ├── meetings/        ← meeting notes (prep + summary), one per meeting — via meeting-prep skill
 │   └── projects/        ← project lifecycle docs (one folder per project)
 │       ├── _template/   ← skeleton copied by .scripts/new-project.sh
 │       └── <slug>/
@@ -106,25 +119,30 @@ Install superpowers and Matt Pocock's skills via the standard Claude Code plugin
 ├── global-skills/       ← skills to install globally (~/.claude/skills/) via install-global-skills.sh
 │   └── send-to-wiki/    ← send feature plans & notes to the vault from any codebase
 ├── .scripts/            ← automation: new-project.sh, list-claude-history.py, etc.
-├── .claude/skills/      ← 10 project-scoped skills the LLM can invoke
+├── .claude/skills/      ← 8 project-scoped skills bundled with the vault (+ more via the marketplace)
 ├── .manifest.json       ← ingest ledger (sources processed, hashes, timestamps)
 └── .vault-meta.json     ← personalization config written by init-vault (one-time)
 ```
 
 ## Skills — when to use each
 
-The vault ships with 10 skills under `.claude/skills/`. Claude Code auto-discovers them. Trigger each by saying anything close to its listed phrases — you rarely have to call them by name.
+Skills come from two places:
 
-### Lifecycle skills (per CRAFTED phase)
+- **Bundled** — 8 project-scoped skills under `.claude/skills/`, auto-discovered by Claude Code when you run it from this directory. They ship with the clone; no install step.
+- **Marketplace** — a few workflows live in the [`YoniRaviv/claude-skills`](https://github.com/YoniRaviv/claude-skills) marketplace so they stay auto-updatable and shared with my other setups. Install once with `/plugin marketplace add YoniRaviv/claude-skills` → `/plugin install yoni-skills@yoni-marketplace`.
+
+Trigger any skill by saying anything close to its listed phrases — you rarely have to call them by name.
+
+### Bundled skills
+
+**Lifecycle (per CRAFTED phase)**
 
 | Skill | Trigger phrases | What it does |
 |---|---|---|
 | [`init-vault`](.claude/skills/init-vault/) | "set up my wiki", "initialize", "personalize" | **One-time** after cloning. Asks ~10 questions (date format, folder picks, topic seed, optional CLAUDE.md tweaks). Writes `.vault-meta.json`. Run once. |
-| [`wiki-research`](.claude/skills/wiki-research/) | "research `<idea>`", "is X worth building", "what's out there for Y", "deep dive on Z" | **Research phase.** Multi-round web search → `01-research.md` for a project, or `## Idea Research` section in `wiki/ideas/<slug>.md` for standalone ideas. Honest verdict required. |
-| [`claude-history-ingest`](.claude/skills/claude-history-ingest/) | "ingest my Claude history", "sync my work", "what have I been working on" | **Try / Evaluate phases.** Mines `~/.claude/projects/*` and desktop agent sessions. Two outputs: journal entries + **automatic project tracking** — advances feature statuses (`planned → in-progress → shipped`), flags blockers, surfaces decisions. |
 | [`wiki-promote-feature`](.claude/skills/wiki-promote-feature/) | "promote feature X", "file the auth feature", "X is shipped — add to wiki" | **Deliver phase.** Lifts a finished feature plan from `raw/projects/<slug>/features/<name>.md` into the schema-compliant `wiki/projects/<slug>/features/<name>.md`. Surfaces decision and pattern candidates. |
 
-### Knowledge skills (anytime)
+**Knowledge (anytime)**
 
 | Skill | Trigger phrases | What it does |
 |---|---|---|
@@ -132,13 +150,24 @@ The vault ships with 10 skills under `.claude/skills/`. Claude Code auto-discove
 | [`wiki-query`](.claude/skills/wiki-query/) | Any question; "consult the brain", "what do I know about X" | Answer with citations. Cheap-first pipeline (index → section grep → full read). Index-only fast mode available. |
 | [`weekly-digest`](.claude/skills/weekly-digest/) | "weekly digest", "what did I do this week", "stand-up" | Read-only synthesis across journals, projects, ingests. Writes to `wiki/digests/<range>.md` + inline output for Slack/email copy-paste. |
 
-### Maintenance skills (periodic)
+**Maintenance (periodic)**
 
 | Skill | Trigger phrases | What it does |
 |---|---|---|
 | [`wiki-status`](.claude/skills/wiki-status/) | "what's the status", "delta", "wiki dashboard", "wiki insights" | Two modes: **delta** (what's pending to ingest, recommend append vs rebuild) and **insights** (graph analysis — hubs, bridges, fragmented topic clusters). |
 | [`wiki-lint`](.claude/skills/wiki-lint/) | "lint the wiki", "audit", "what needs fixing" | 12-check health audit: orphans, broken links, missing frontmatter, stale projects, topic vocabulary issues, date format consistency, journal filename pattern. |
 | [`cross-linker`](.claude/skills/cross-linker/) | "link my pages", "cross-reference", "find missing links" | Write-heavy companion to `wiki-lint` — actually inserts the missing `[[wikilinks]]`. Pair with lint: lint finds the problems, cross-linker fixes them. |
+
+### Marketplace skills (install from [`YoniRaviv/claude-skills`](https://github.com/YoniRaviv/claude-skills))
+
+| Skill | Trigger phrases | What it does |
+|---|---|---|
+| `idea-deep-research` | "research `<idea>`", "is X worth building", "what's out there for Y", "deep dive on Z" | **Research phase.** Multi-round web search → `## Idea Research` section in `wiki/ideas/<slug>.md`. Honest verdict required. |
+| `claude-history-ingest` | "ingest my Claude history", "sync my work", "what have I been working on" | **Try / Evaluate phases.** Mines `~/.claude/projects/*` and desktop agent sessions. Two outputs: journal entries + **automatic project tracking** — advances feature statuses, flags blockers, surfaces decisions. |
+| `standup` | "/standup", "where did I leave off", "start my day", "what's on my plate" | **Daily.** Reassembles cross-project state (hot.md, project STATUS, recent journals, PRs you owe) into `wiki/today.md`. On-demand; never hand-edit `today.md`. |
+| `meeting-prep` | "/meeting-prep `<topic>`", "prep me for the X meeting", "summarize the meeting" | Carries a meeting through prep → live notes → summary as one note in `raw/meetings/`. |
+
+> `global-skills/send-to-wiki` is a third skill category — installed **globally** (not via the marketplace) with `.scripts/install-global-skills.sh` so you can capture content into this vault from any other codebase. See [Getting started](#5-install-skills-marketplace--global).
 
 ## Prerequisites
 
@@ -159,8 +188,7 @@ Claude and Obsidian work together natively — both read and write the same plai
 |---|---|---|
 | **[Obsidian Web Clipper](https://obsidian.md/clipper)** | Browser extension that clips articles, tweets, and pages straight into `raw/articles/` (or `raw/tweets/`). Feeds the wiki without manual copy-paste. | [obsidian.md/clipper](https://obsidian.md/clipper) — Chrome, Firefox, Safari, Edge, Arc |
 | **[Claude Code `obsidian` plugin](https://docs.claude.com/en/docs/claude-code/plugins)** + **[Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)** | Only needed if you want the `obsidian:obsidian-cli` skill — triggers Obsidian commands, runs JavaScript in the vault, reloads plugins. Wiki operations don't need this. | Install Local REST API in Obsidian (Community plugins → "Local REST API"), then install the obsidian plugin from the Claude Code marketplace |
-| **[`superpowers` plugin](https://github.com/obra/superpowers)** | Provides `brainstorming`, `writing-plans`, and other planning skills referenced in the Frame phase. | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| **[Matt Pocock's skills](https://github.com/mattpocock/skills)** | Provides `to-prd` and `grill-me` for the Architect phase. | [github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| **[`YoniRaviv/claude-skills` marketplace](https://github.com/YoniRaviv/claude-skills)** | One-stop install for the marketplace skills this vault references (`idea-deep-research`, `claude-history-ingest`, `standup`, `meeting-prep`) plus `superpowers`, `ui-ux-pro-max`, and cherry-picked skills like `to-spec` / `grill-me`. | `/plugin marketplace add YoniRaviv/claude-skills` |
 
 ## Getting started
 
@@ -200,15 +228,25 @@ In the Claude session, say:
 
 This triggers the **`init-vault`** skill — walks you through ~10 questions (name, role, stack(s), date format, folder customization, journal opt-in, starter topics) and applies all the cascading edits across `CLAUDE.md`, `README.md`, templates, and scripts. End result: a vault that matches how you actually work. Writes `.vault-meta.json` so this only runs once.
 
-### 5. Install global skills
+### 5. Install skills (marketplace + global)
+
+**Marketplace skills** — the lifecycle and daily skills that live outside this repo (`idea-deep-research`, `claude-history-ingest`, `standup`, `meeting-prep`) plus the planning plugins. In a Claude Code session:
+
+```text
+/plugin marketplace add YoniRaviv/claude-skills
+/plugin install yoni-skills@yoni-marketplace
+/plugin install superpowers@yoni-marketplace
+```
+
+**Global capture skill** — installs `global-skills/send-to-wiki` to `~/.claude/skills/` with your vault path baked in:
 
 ```sh
 .scripts/install-global-skills.sh
 ```
 
-Copies skills from `global-skills/` to `~/.claude/skills/` with your vault path baked in. After this, from **any project codebase** you can say "send to wiki" / "save to vault" and Claude will write the content to the right lifecycle slot in this vault without switching directories.
+After this, from **any project codebase** you can say "send to wiki" / "save to vault" and Claude will write the content to the right lifecycle slot in this vault without switching directories. Re-run any time to update.
 
-Re-run any time to update the installed skills.
+> The 8 skills under `.claude/skills/` need no install — Claude Code auto-discovers them when you run it from the vault directory.
 
 ### 6. Try your first ingest
 
@@ -270,8 +308,8 @@ If you don't want to implement the script, the `claude-history-ingest` skill doe
 Creates `raw/projects/my-new-project/` from the template with stamped dates. Then walk the phases:
 
 1. **C — Conceive**: fill `00-idea.md`.
-2. **R — Research**: ask Claude to `research my-new-project` → produces `01-research.md` (or appends to a `wiki/ideas/` page if the idea is standalone).
-3. **A — Architect**: write `02-prd.md` manually (what + why) — or use [`to-prd`](https://github.com/mattpocock/skills) to draft it from a brainstorming conversation, then stress-test with [`grill-me`](https://github.com/mattpocock/skills).
+2. **R — Research**: ask Claude to `research my-new-project` → `idea-deep-research` produces a `## Idea Research` section in `wiki/ideas/<slug>.md` (or `01-research.md` inside the project).
+3. **A — Architect**: write `02-prd.md` manually (what + why) — or use [`to-spec`](https://github.com/YoniRaviv/claude-skills) to draft it from a brainstorming conversation, then stress-test with [`grill-me`](https://github.com/YoniRaviv/claude-skills).
 4. **F — Frame**: in your code repo, use Claude Code Plan Mode (Shift+Tab) or `brainstorming` + `writing-plans` from superpowers. Stress-test with [`grill-me`](https://github.com/mattpocock/skills). Save the resulting feature plans back into `raw/projects/my-new-project/features/<feature>.md`.
 5. **T — Try**: build in your code repo. `claude-history-ingest` tracks progress.
 6. **E — Evaluate**: test in your code repo. Same tracker.
@@ -279,6 +317,8 @@ Creates `raw/projects/my-new-project/` from the template with stamped dates. The
 
 In between, periodically:
 
+- `standup` at the start of the day to reassemble where you left off into `wiki/today.md`.
+- `meeting-prep <topic>` before a meeting, then "summarize the meeting" after.
 - `ingest <path>` to add sources you've clipped.
 - `lint the wiki` + `cross-linker` to keep the graph healthy.
 - `weekly-digest` for a Friday recap.
