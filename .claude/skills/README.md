@@ -29,20 +29,21 @@ description: One-line description of when this skill should be used.
 (The body of the skill — instructions Claude follows when the skill is invoked.)
 ```
 
-## Recommended skills for this workflow
+## Bundled skills
 
-The vault works fine without any skills — the operations in `CLAUDE.md` (INGEST, QUERY, SURFACE, LINT, BOOTSTRAP) are baseline behaviors. But these skills make daily use noticeably better:
+The vault works fine without any skills — the operations in `CLAUDE.md` (INGEST, QUERY, SURFACE, LINT, BOOTSTRAP) are baseline behaviors. These 8 skills, bundled here and auto-discovered when you run Claude Code from the vault, make daily use noticeably better:
 
-- **research** — autonomous multi-round web research that files findings directly into `wiki/`.
-- **ingest-url** — fetch a URL, distill the content, and file it as a wiki source page in one step.
-- **wiki-capture** — turn the current conversation into a permanent wiki note.
-- **cross-linker** — scan the wiki for missing `[[wikilinks]]` between related pages.
-- **wiki-status** — quick health/coverage dashboard for the vault.
+- **init-vault** — one-time personalization after cloning the template.
+- **wiki-ingest** — distill any source (article, tweet, repo, PDF, screenshot) into `wiki/sources/` and propagate it.
+- **wiki-query** — answer questions from the wiki with citations.
+- **wiki-promote-feature** — lift a finished feature from `raw/` into a schema-compliant `wiki/` page.
+- **weekly-digest** — synthesize activity across journals/projects/ingests into a copy-pasteable recap.
+- **wiki-status** — delta + graph-insights dashboard for the vault.
+- **wiki-lint** — health audit (orphans, broken links, stale projects, topic vocabulary).
+- **cross-linker** — write-heavy companion to lint; inserts the missing `[[wikilinks]]`.
 
-Add them as you decide which ones you actually use. Start with none and pull them in deliberately — extra skills add noise to the LLM's choice surface, which can hurt more than the skills help.
+## Skills that live elsewhere
 
-## Where to find skills
-
-- This vault's curated set (when filled in): browse the folders here.
-- Skills shipped with Claude Code or plugins: see Claude Code's docs.
-- Build your own: see the `skill-creator` skill if available, or just drop a folder with a `SKILL.md` here.
+- **Marketplace** — `idea-deep-research`, `claude-history-ingest`, `standup`, `meeting-prep` install from [`YoniRaviv/claude-skills`](https://github.com/YoniRaviv/claude-skills) (`/plugin marketplace add YoniRaviv/claude-skills`). They're referenced here but not bundled, so they stay auto-updatable.
+- **Global** — `send-to-wiki` lives in `../../global-skills/` and installs to `~/.claude/skills/` via `.scripts/install-global-skills.sh`.
+- **Build your own** — drop a folder with a `SKILL.md` here, or use a `skill-creator` skill if you have one.
