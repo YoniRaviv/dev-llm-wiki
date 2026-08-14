@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Scaffold a new project under raw/projects/ from the _template.
+# Scaffold a new project under projects/ from .templates/project/.
 # Usage: .scripts/new-project.sh <slug>
 # Example: .scripts/new-project.sh customer-portal
+#
+# Creates only what the whitelist allows, with `tracker: none` — so the plan slots
+# (03-plan.md, roadmaps/, features/) are legal. Create them when you have a plan.
 
 set -euo pipefail
 
@@ -19,20 +22,19 @@ if [[ ! "$SLUG" =~ ^[a-z][a-z0-9-]*$ ]]; then
 fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TEMPLATE="$ROOT/raw/projects/_template"
-DEST="$ROOT/raw/projects/$SLUG"
+TEMPLATE="$ROOT/.templates/project"
+PAGE="$ROOT/projects/$SLUG.md"
+DEST="$ROOT/projects/$SLUG"
 
 if [[ ! -d "$TEMPLATE" ]]; then
   echo "error: template not found at $TEMPLATE" >&2
   exit 1
 fi
 
-if [[ -e "$DEST" ]]; then
-  echo "error: $DEST already exists" >&2
+if [[ -e "$PAGE" || -e "$DEST" ]]; then
+  echo "error: projects/$SLUG already exists" >&2
   exit 1
 fi
-
-cp -R "$TEMPLATE" "$DEST"
 
 TODAY=$(date +%d-%m-%Y)
 
@@ -43,11 +45,34 @@ else
   SED_INPLACE=(sed -i '')
 fi
 
+mkdir -p "$DEST/notes" "$DEST/assets"
+touch "$DEST/notes/.gitkeep" "$DEST/assets/.gitkeep"
+
+cp "$TEMPLATE/page.md"       "$PAGE"
+cp "$TEMPLATE/00-idea.md"    "$DEST/00-idea.md"
+cp "$TEMPLATE/02-prd.md"     "$DEST/02-prd.md"
+
 "${SED_INPLACE[@]}" \
   -e "s|<project-slug>|$SLUG|g" \
-  -e "s|updated: DD-MM-YYYY|updated: $TODAY|g" \
-  -e "s|\\*\\*Last touched:\\*\\* DD-MM-YYYY|**Last touched:** $TODAY|g" \
-  "$DEST/STATUS.md"
+  -e "s|started: DD-MM-YYYY|started: $TODAY|g" \
+  "$PAGE"
 
-echo "Created raw/projects/$SLUG/"
-echo "Next: open $DEST/STATUS.md and start filling in."
+cat <<EOF
+Created:
+  projects/$SLUG.md          project page — tracker: none
+  projects/$SLUG/00-idea.md  yours to write
+  projects/$SLUG/02-prd.md   what + why (never how/when)
+  projects/$SLUG/notes/      dated notes
+  projects/$SLUG/assets/     diagrams, exports
+
+Optional, legal while tracker is none:
+  03-plan.md · roadmaps/ · features/
+Also available:
+  01-research.md · shipped/   (see .templates/project/ for skeletons)
+
+Next:
+  1. Fill in 00-idea.md.
+  2. Add projects/$SLUG.md to wiki/index.md and link it from one wiki page —
+     until then vault-check reports it under 'orphans'. That is expected for a
+     brand-new project, and it does not block a commit.
+EOF

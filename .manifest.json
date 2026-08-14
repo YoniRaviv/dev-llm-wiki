@@ -1,5 +1,14 @@
 {
-  "version": "1.0",
-  "description": "Ingest tracking ledger. Each entry records a raw source that was processed into the wiki.",
+  "version": "2.0",
+  "description": "Ingest tracking ledger. One entry per raw source processed into the wiki. content_hash is the primary skip signal on later runs: a matching hash means already ingested, a changed hash means re-ingest only the delta into the existing wiki/sources/ page.",
+  "entry_shape": {
+    "path": "raw/<subdir>/<filename>.md",
+    "ingested_at": "<ISO 8601 timestamp>",
+    "content_hash": "sha256:<64-hex>",
+    "source_type": "document | claude_conversation",
+    "project": "<project-slug or null>",
+    "pages_created": [],
+    "pages_updated": []
+  },
   "ingested": []
 }

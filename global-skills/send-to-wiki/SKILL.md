@@ -1,78 +1,118 @@
 ---
 name: send-to-wiki
-description: Send content from any project codebase to the dev wiki vault at {{VAULT_PATH}}. Use when working in a code repo and wanting to save a feature plan, decision, research note, or meeting note to the correct project slot in the vault. Triggers on: "send to wiki", "save to vault", "add to my wiki", "push to dev wiki", "save this feature plan", "write this to the vault", "capture this in the wiki".
+description: Send content from any project codebase to the dev wiki vault at {{VAULT_PATH}}. Use when working in a code repo and wanting to save a feature plan, PRD, research note, meeting note, or shipped-work record to the correct project slot in the vault. Triggers on: "send to wiki", "save to vault", "add to my wiki", "push to dev wiki", "save this feature plan", "write this to the vault", "capture this in the wiki".
 ---
 
 # Send to Dev Wiki
 
-Save content from any project codebase to the correct lifecycle slot in the dev wiki.
-
-## Vault path
+Save content from a project codebase into the correct slot in the dev wiki. You are writing into a
+gated vault: `{{VAULT_PATH}}/CLAUDE.md` is the contract, and `.scripts/vault-check.py` will reject
+a write that breaks it.
 
 ```
 VAULT = {{VAULT_PATH}}
 ```
 
-## Lifecycle slot map
+## The invariant — read this before choosing a slot
 
-| Content type | Destination |
-|---|---|
-| Feature plan / spec | `raw/projects/<slug>/features/<name>.md` |
-| High-level plan (how) | `raw/projects/<slug>/03-plan.md` |
-| PRD / what + why | `raw/projects/<slug>/02-prd.md` |
-| Research / landscape | `raw/projects/<slug>/01-research.md` |
-| Initial idea / brief | `raw/projects/<slug>/00-idea.md` |
-| Meeting / ad-hoc note | `raw/projects/<slug>/notes/DD-MM-YYYY-<topic>.md` |
-| Status update | `raw/projects/<slug>/STATUS.md` |
+> The vault stores tracker **identity** (a URL) — never tracker **state**.
 
-## Workflow
+There is **no status slot**. If what you are about to save is progress — "70% done", "blocked on
+the API team", "next up: caching" — it belongs in the issue tracker, not here. Say so and stop.
 
-### 1. Identify the project slug
+## Step 1 — Identify the project slug
 
-Try to infer from context in this order:
-1. Current git repo name — run `git remote get-url origin`, parse the repo name, convert to kebab-case
-2. Current working directory name, converted to kebab-case
-3. Ask the user: "Which vault project should this go to? (e.g. `my-app`)"
+In order:
 
-Then verify the project exists:
+1. `git remote get-url origin` → repo name → kebab-case
+2. current directory name → kebab-case
+3. ask the user
+
+Then confirm the project exists and read its tracker in one go:
+
 ```sh
-ls {{VAULT_PATH}}/raw/projects/<slug>/
+ls {{VAULT_PATH}}/projects/<slug>/ 2>/dev/null
+grep '^tracker:' {{VAULT_PATH}}/projects/<slug>.md
 ```
 
-If the folder doesn't exist, tell the user:
-> "No vault project found for `<slug>`. Run `.scripts/new-project.sh <slug>` from the wiki directory first, or tell me a different slug."
+If the project page doesn't exist:
 
-### 2. Identify content type and destination
+> "No vault project found for `<slug>`. Run `.scripts/new-project.sh <slug>` from the vault, or
+> tell me a different slug."
 
-Infer from context (what was just built, planned, or said). When ambiguous, show the slot map above and ask which row fits.
+## Step 2 — The plan gate decides half the slot map
 
-- **Feature plans**: ask for the feature name if not obvious, convert to kebab-case for the filename.
-- **Meeting notes**: use today's date in the vault's configured date format (check `{{VAULT_PATH}}/.vault-meta.json` → `date_format`; default `DD-MM-YYYY`). Ask for a short topic label.
-- **Spine docs** (00–03, STATUS): warn if the file already exists and ask whether to overwrite or append.
+`tracker:` is not metadata here — it determines which slots are **legal**:
 
-### 3. Confirm before writing
+| `tracker:` | Plan slots (`03-plan.md`, `roadmaps/`, `features/`) |
+|---|---|
+| `none` | legal — the vault holds the only copy of the how/when |
+| anything else | **illegal** — the tracker owns how/when; pre-commit rejects them |
+
+So if `tracker:` is not `none` and the user asks to save a feature plan or a roadmap, do not write
+it. Say:
+
+> "`<slug>` has `tracker: <value>`, so plans live there, not in the vault. Want me to write this
+> up as a tracker issue description you can paste instead?"
+
+## Step 3 — Slot map
+
+| Content | Destination | Condition |
+|---|---|---|
+| initial spark / brief | `projects/<slug>/00-idea.md` | — |
+| research, landscape, verdict | `projects/<slug>/01-research.md` | — |
+| PRD — what + why | `projects/<slug>/02-prd.md` | must pass the PRD purity rules below |
+| high-level how + when | `projects/<slug>/03-plan.md` | **`tracker: none` only** |
+| feature plan / spec | `projects/<slug>/features/<name>.md` | **`tracker: none` only** |
+| versioned roadmap | `projects/<slug>/roadmaps/v<N>.md` | **`tracker: none` only** |
+| record of work that **shipped** | `projects/<slug>/shipped/<name>.md` | frontmatter needs `status: shipped` |
+| dated ad-hoc / meeting note | `projects/<slug>/notes/DD-MM-YYYY-<topic>.md` | — |
+| diagram, csv, html, pdf | `projects/<slug>/assets/<name>.<ext>` | — |
+| build order + does-it-work | `projects/<slug>/spine.md` | **tracker set only** |
+| a status update | — | **refuse** — it belongs in the tracker |
+
+Nothing else may exist under `projects/<slug>/`. Never invent a path.
+
+**PRD purity** — `02-prd.md` rejects `- [ ]` checkboxes, `## Phase` headings, and bare dates.
+Strip them before writing, or move that content to the plan slot / tracker and tell the user which.
+
+## Step 4 — Confirm before writing
 
 State the full destination path and a one-line summary:
 
-> "Writing feature plan for `user-auth` to `raw/projects/my-app/features/user-auth.md` in the vault. OK?"
+> "Writing the `user-auth` feature plan to `projects/my-app/features/user-auth.md`
+> (`tracker: none`, so the plan slot is legal). OK?"
 
-Wait for confirmation.
+Wait for confirmation. If the file exists, read it first and ask overwrite-or-append.
 
-### 4. Format the content
+## Step 5 — Frontmatter
 
-Apply the correct frontmatter for the slot:
+Dates are `DD-MM-YYYY` unless `{{VAULT_PATH}}/.vault-meta.json` → `date_format` says otherwise.
 
-**features/\*.md**
+**`features/*.md`**
 ```yaml
 ---
 project: <slug>
-status: planned
 topics: []
 started: <today>
 ---
 ```
 
-**notes/\*.md**
+**`shipped/*.md`** — `status: shipped` is mandatory and must be exactly that. PR/commit refs go in
+`shipped_in:`, never in `status:`.
+```yaml
+---
+project: <slug>
+status: shipped
+topics: []
+started: <today>
+shipped: <today>
+summary: "<one sentence: what now works that didn't before>"
+shipped_in: <PR or commit ref>
+---
+```
+
+**`notes/*.md`**
 ```yaml
 ---
 date: <today>
@@ -80,19 +120,21 @@ type: note
 ---
 ```
 
-**00-idea.md / 01-research.md / 02-prd.md / 03-plan.md** — no required frontmatter; preserve any the user already has.
+**`00-idea.md` / `01-research.md` / `02-prd.md` / `03-plan.md`** — no required frontmatter;
+preserve anything already there.
 
-**STATUS.md** — plain markdown, no frontmatter.
+Populate the body faithfully from the conversation. Mark anything uncertain `> ❓ TBD: …`.
+Never write `Working on`, `Next up`, `Blocked on`, `Phase:`, `Last touched`, or a percentage
+complete into any of them.
 
-Populate the body faithfully from the conversation. Mark anything uncertain with `> ❓ TBD: ...`.
+## Step 6 — Verify, then report
 
-### 5. Write the file
+```sh
+cd {{VAULT_PATH}} && python3 .scripts/vault-check.py
+```
 
-Create any missing directories (`features/`, `notes/`) before writing.
+If it flags something you introduced, fix it — do not leave the vault dirty for the user's next
+commit. A brand-new page reported under `orphans` is expected until a wiki page links it; mention
+it rather than fixing it silently.
 
-If the file already exists: read it first, then ask "Overwrite or append?"
-
-### 6. Confirm
-
-Report the full path written:
-> "Saved to `raw/projects/my-app/features/user-auth.md`. When the feature ships, ask Claude to `promote-feature user-auth` from the wiki directory to lift it into the schema-compliant wiki page."
+Then report the path written.

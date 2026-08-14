@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TEMPLATE="$ROOT/wiki/templates/daily-note.md"
+TEMPLATE="$ROOT/.templates/daily-note.md"
 JOURNAL_DIR="$ROOT/wiki/journal"
 
 if [[ $# -ge 1 ]]; then
