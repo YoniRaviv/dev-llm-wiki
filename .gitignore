@@ -7,6 +7,9 @@ Thumbs.db
 .vscode/
 *.sublime-workspace
 
+# derived view — regenerated, never committed. vault-check enforces this.
+today.md
+
 # Obsidian local state — keep settings out, but feel free to commit shared plugins/themes
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
@@ -14,6 +17,12 @@ Thumbs.db
 
 # Claude Code local overrides
 .claude/settings.local.json
+
+# transient agent artifacts — regenerated per session, never vault content
+.superpowers/
+.playwright-mcp/
+.context/
+skills-lock.json
 
 # Script-generated logs
 .scripts/*.log
